@@ -111,7 +111,7 @@
         "diagnosticsProfile": {
           "bootDiagnostics": {
             "enabled": true,
-            "storageUri": "[concat('http://f5demostorage','storage','.blob.core.windows.net')]"
+            "storageUri": "[concat('http://f5demostorage'.blob.core.windows.net')]"
           }
         }
       }
