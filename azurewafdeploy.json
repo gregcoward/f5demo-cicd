@@ -32,12 +32,6 @@
     "securityBlockingLevel": {
       "type": "string"
     },
-    "storageAccountName": {
-      "type": "string"
-    },
-    "storageAccountKey": {
-      "type": "securestring"
-    },
     "applicationCertificate": {
       "type": "string"
     },
@@ -57,7 +51,8 @@
     "vmSize": "Standard_A3",
     "nicNamePrefix": "[concat(parameters('namePrefix'),'nic')]",
     "availabilitySetID": "[resourceId('Microsoft.Compute/availabilitySets',concat(parameters('namePrefix'), 'avset'))]",
-    "newStorageAccountName": "f5demostorage",
+    "storageAccountName": "f5demostorage",
+    "storageAccountKey": "uxvBmjhDABaG3NwVxoWzb1kRptnVoSCMgNM4nAioW13YJ3sz/k5vzqGjJRmmkf6qUjISTzfWsVoT6UE/xhYHXg==",
     "wafNamePrefix": "[concat(parameters('namePrefix'),'waf')]",
     "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(parameters('namePrefix'),'nsg'))]",
     "lbID": "[resourceId('Microsoft.Network/loadBalancers',concat(parameters('namePrefix'), 'lb'))]",
@@ -147,7 +142,7 @@
           "osDisk": {
             "name": "[concat('osdisk',0)]",
             "vhd": {
-              "uri": "[concat('http://',variables('newStorageAccountName'),'.blob.core.windows.net/',variables('newStorageAccountName'),'/osDisk',0,'.vhd')]"
+              "uri": "[concat('http://',variables(storageAccountName'),'.blob.core.windows.net/',variables('storageAccountName'),'/osDisk',0,'.vhd')]"
             },
             "caching": "ReadWrite",
             "createOption": "FromImage"
@@ -163,7 +158,7 @@
         "diagnosticsProfile": {
           "bootDiagnostics": {
             "enabled": true,
-            "storageUri": "[concat('http://',variables('newstorageAccountName'),'.blob.core.windows.net')]"
+            "storageUri": "[concat('http://',variables('storageAccountName'),'.blob.core.windows.net')]"
           }
         }
       }
@@ -190,8 +185,8 @@
           "commandToExecute": "[concat('bash start.sh ','true',';',concat(variables('wafNamePrefix'),0),';',concat('10.10.2.',4),';',parameters('adminPassword'),';',parameters('licenseToken1'),';',toLower(variables('applicationName')),' 880;8444 ',variables('applicationProtocols'),' ',parameters('appAddress1'),';',parameters('appAddress2'),';',replace(toLower(parameters('location')),' ',''),' ',variables('applicationPorts'),' ',toLower(parameters('applicationType')),';',toLower(parameters('securityBlockingLevel')),';',toLower(variables('applicationFQDN')),';',parameters('applicationCertificate'),';',parameters('applicationKey'),';',parameters('applicationChain'))]"
         },
         "protectedSettings": {
-          "storageAccountName": "[parameters('storageAccountName')]",
-          "storageAccountKey": "[parameters('storageAccountKey')]"
+          "storageAccountName": "[variables('storageAccountName')]",
+          "storageAccountKey": "[variables('storageAccountKey')]"
         }
       }
     }

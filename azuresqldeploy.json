@@ -22,6 +22,7 @@
     "vnetID": "[resourceId('f5demo-networking-eastus','Microsoft.Network/virtualNetworks','f5demo-vnet-eastus')]",
     "subnetID": "[concat(variables('vnetID'),'/subnets/','internal')]",
     "lbID": "[resourceId('Microsoft.Network/loadBalancers',concat(parameters('namePrefix'),'lb'))]",
+    "storageAccountName": "f5demostorage",
     "imagePublisher": "Canonical",
     "imageOffer": "UbuntuServer",
     "imageSKU": "14.04.2-LTS"
@@ -95,7 +96,7 @@
           "osDisk": {
             "name": "osdisk",
             "vhd": {
-              "uri": "[concat('http://f5demostorage','.blob.core.windows.net/vhds/','osdisk01.vhd')]"
+              "uri": "[concat('http://',variables(storageAccountName'),'.blob.core.windows.net/vhds/','osdisk01.vhd')]"
             },
             "caching": "ReadWrite",
             "createOption": "FromImage"
@@ -111,7 +112,7 @@
         "diagnosticsProfile": {
           "bootDiagnostics": {
             "enabled": true,
-            "storageUri": "[concat('http://f5demostorage'.blob.core.windows.net')]"
+            "storageUri": "[concat('http://',variables(storageAccountName'),'.blob.core.windows.net')]"
           }
         }
       }
