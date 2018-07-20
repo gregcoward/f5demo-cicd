@@ -181,8 +181,8 @@
         "typeHandlerVersion": "1.4",
         "settings": {
           "fileUris": [
-            "https://raw.githubusercontent.com/tstanley93/OpenCart-WAF/master/OpenCart-WAF/azuresecurity.sh",
-            "https://raw.githubusercontent.com/tstanley93/OpenCart-WAF/master/OpenCart-WAF/start.sh",
+            "https://raw.githubusercontent.com/gregcoward/f5demo-cicd/master/azuresecurity.sh",
+            "https://raw.githubusercontent.com/gregcoward/f5demo-cicd/master/start.sh",
             "[parameters('applicationCertificate')]",
             "[parameters('applicationKey')]",
             "[parameters('applicationChain')]"
