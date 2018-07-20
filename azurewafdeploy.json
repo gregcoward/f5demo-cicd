@@ -62,7 +62,7 @@
     "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(parameters('namePrefix'),'nsg'))]",
     "lbID": "[resourceId('Microsoft.Network/loadBalancers',concat(parameters('namePrefix'), 'lb'))]",
     "frontEndIPConfigID": "[concat(variables('lbID'),'/frontendIPConfigurations/loadBalancerFrontEnd')]",
-    "vnetID": "[resourceId('Microsoft.Network/virtualNetworks','f5demo-vnet-eastus')]",
+    "vnetID": "[resourceId('f5demo-networking-eastus','Microsoft.Network/virtualNetworks','f5demo-vnet-eastus')]",
     "subnetID": "[concat(variables('vnetID'),'/subnets/external')]"
   },
   "resources": [
