@@ -20,7 +20,7 @@
   },
   "variables": {
     "vnetID": "[resourceId('Microsoft.Network/virtualNetworks','f5demo-vnet-eastus')]",
-    "subnetRef": "[concat(variables('vnetID'),'/subnets/','internal')]",
+    "subnetID": "[concat(variables('vnetID'),'/subnets/','internal')]",
     "lbID": "[resourceId('Microsoft.Network/loadBalancers',concat(parameters('namePrefix'),'lb'))]",
     "imagePublisher": "Canonical",
     "imageOffer": "UbuntuServer",
@@ -45,7 +45,7 @@
             "properties": {
               "privateIPAllocationMethod": "Dynamic",
               "subnet": {
-                "id": "[variables('subnetRef')]"
+                "id": "[variables('subnetID')]"
               },
               "loadBalancerBackendAddressPools": [
                 {
