@@ -87,7 +87,8 @@
       "name": "[concat(variables('dnsLabel'), '-sql')]",
       "location": "[variables('location')]",
       "dependsOn": [
-        "[concat('Microsoft.Network/networkInterfaces/', variables('dnsLabel'),'-sql-nic')]"
+        "[concat('Microsoft.Network/networkInterfaces/', variables('dnsLabel'),'-sql-nic')]",
+        "[concat('Microsoft.Storage/storageAccounts/', variables('newDataStorageAccountName'))]"
       ],
       "properties": {
         "availabilitySet": {
