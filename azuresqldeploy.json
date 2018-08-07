@@ -17,7 +17,6 @@
     "location": "[resourceGroup().location]",
     "vnetID": "[resourceId('f5demo-networking-eastus','Microsoft.Network/virtualNetworks','f5demo-vnet-eastus')]",
     "subnetID": "[concat(variables('vnetID'),'/subnets/','internal')]",
-    "lbID": "[resourceId('Microsoft.Network/loadBalancers',concat(parameters('namePrefix'),'lb'))]",
     "newDataStorageAccountName": "[concat(uniqueString(variables('dnsLabel'), resourceGroup().id, deployment().name), 'data001')]",
     "imagePublisher": "Canonical",
     "imageOffer": "UbuntuServer",
