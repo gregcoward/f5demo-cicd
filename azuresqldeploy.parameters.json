@@ -1,1 +1,9 @@
-
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "parameterValues": {
+    "adminUsername": {
+      "type": "string",
+      "defaultValue": "xuser"
+    }
+  }
+}
