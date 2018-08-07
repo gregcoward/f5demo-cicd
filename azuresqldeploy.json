@@ -91,7 +91,6 @@
       ],
       "properties": {
         "availabilitySet": {
-          "id": "[resourceId('Microsoft.Compute/availabilitySets',concat(variables('dnsLabel'),'-sql-as'))]"
         },
         "hardwareProfile": {
           "vmSize": "[variables('vmSize')]"
