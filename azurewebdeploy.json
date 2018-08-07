@@ -25,7 +25,8 @@
     "storageAccountName": "f5demostorage",
     "imagePublisher": "Canonical",
     "imageOffer": "UbuntuServer",
-    "imageSKU": "14.04.2-LTS"
+    "imageSKU": "14.04.2-LTS",
+    "webNicIPAddressPrefix": "10.10.1."
   },
   "resources": [
     {
@@ -48,7 +49,8 @@
           {
             "name": "ipconfig1",
             "properties": {
-              "privateIPAllocationMethod": "Dynamic",
+              "privateIPAllocationMethod": "static",
+              "privateIPAddress": "[concat(variables('webNicIPAddressPrefix'), string(add(10, copyindex()))]",
               "subnet": {
                 "id": "[variables('subnetID')]"
               },
