@@ -61,7 +61,7 @@
             "name": "ipconfig1",
             "properties": {
               "privateIPAllocationMethod": "static",
-              "privateIPAddress": "[concat(variables('webNicIPAddressPrefix'), string(add(11, copyindex()))]",
+              "privateIPAddress": "[concat(variables('webNicIPAddressPrefix'), string(add(11, copyindex())))]",
               "subnet": {
                 "id": "[variables('subnetID')]"
               }
