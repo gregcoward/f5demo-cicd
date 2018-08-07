@@ -20,6 +20,13 @@
     "imagePublisher": "Canonical",
     "imageOffer": "UbuntuServer",
     "imageSKU": "14.04.2-LTS",
+    "tagValues": {
+      "application": "APP",
+      "cost": "COST",
+      "environment": "ENV",
+      "group": "GROUP",
+      "owner": "OWNER"
+    },
     "newDataStorageAccountName": "[concat(uniqueString(variables('dnsLabel'), resourceGroup().id, deployment().name), 'data002')]",
     "webNicIPAddressPrefix": "10.10.1."
   },
