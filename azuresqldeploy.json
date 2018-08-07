@@ -83,7 +83,7 @@
           "vmSize": "[variables('vmSize')]"
         },
         "osProfile": {
-          "computerName": "[concat(parameters('namePrefix'), '-sql')]",
+          "computerName": "[concat(variables('dnsLabel'), '-sql')]",
           "adminUsername": "[variables('adminUsername')]",
           "adminPassword": "[parameters('adminPassword')]"
         },
