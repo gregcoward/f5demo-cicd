@@ -62,16 +62,7 @@
               "privateIPAddress": "[variables('sqlNicIPAddress')]",
               "subnet": {
                 "id": "[variables('subnetID')]"
-              },
-              "loadBalancerBackendAddressPools": [
-                {
-
-                }
-              ],
-              "loadBalancerInboundNatRules": [
-                {
-                }
-              ]
+              }
             }
           }
         ]
@@ -90,8 +81,6 @@
         "[concat('Microsoft.Storage/storageAccounts/', variables('newDataStorageAccountName'))]"
       ],
       "properties": {
-        "availabilitySet": {
-        },
         "hardwareProfile": {
           "vmSize": "[variables('vmSize')]"
         },
