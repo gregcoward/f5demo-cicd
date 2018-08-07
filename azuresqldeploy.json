@@ -52,8 +52,6 @@
       "name": "[concat(variables('dnsLabel'),'-sql-nic')]",
       "location": "[variables('location')]",
       "properties": {
-        "networkSecurityGroup": {
-        },
         "ipConfigurations": [
           {
             "name": "ipconfig1",
