@@ -2,62 +2,75 @@
   "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "namePrefix": {
-      "type": "string"
-    },
-    "location": {
-      "type": "string"
-    },
-    "vmSize": {
-      "type": "string"
-    },
-    "adminUsername": {
-      "type": "string"
-    },
     "adminPassword": {
       "type": "securestring"
     }
   },
   "variables": {
+    "adminUsername": "xuser",
+    "computeApiVersion": "2017-12-01",
+    "networkApiVersion": "2017-11-01",
+    "storageApiVersion": "2017-10-01",
+    "dataStorageAccountType": "Standard_LRS",
+    "vmSize": "Standard_A4",
+    "dnsLabel": "[toLower(concat('f5demo-',substring(uniqueString(resourceGroup().id),0,5)))]",
+    "location": "[resourceGroup().location]",
     "vnetID": "[resourceId('f5demo-networking-eastus','Microsoft.Network/virtualNetworks','f5demo-vnet-eastus')]",
     "subnetID": "[concat(variables('vnetID'),'/subnets/','internal')]",
     "lbID": "[resourceId('Microsoft.Network/loadBalancers',concat(parameters('namePrefix'),'lb'))]",
-    "storageAccountName": "f5demostorage",
+    "newDataStorageAccountName": "[concat(uniqueString(variables('dnsLabel'), resourceGroup().id, deployment().name), 'data001')]",
     "imagePublisher": "Canonical",
     "imageOffer": "UbuntuServer",
     "imageSKU": "14.04.2-LTS",
-    "sqlNicIPAddress": "10.10.1.25"
+    "sqlNicIPAddress": "10.10.1.25",
+    "tagValues": {
+      "application": "APP",
+      "cost": "COST",
+      "environment": "ENV",
+      "group": "GROUP",
+      "owner": "OWNER"
+    }
   },
   "resources": [
+    {
+      "apiVersion": "[variables('storageApiVersion')]",
+      "kind": "Storage",
+      "location": "[variables('location')]",
+      "name": "[variables('newDataStorageAccountName')]",
+      "sku": {
+        "name": "[variables('dataStorageAccountType')]",
+        "tier": "Standard"
+      },
+      "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
+      "type": "Microsoft.Storage/storageAccounts"
+    },
     {
       "apiVersion": "2015-05-01-preview",
       "type": "Microsoft.Network/networkInterfaces",
       "tags": {
         "displayName": "NIC"
       },
-      "name": "[concat(parameters('NamePrefix'),'sqlnic')]",
-      "location": "[parameters('location')]",
+      "name": "[concat(variables('dnsLabel'),'-sql-nic')]",
+      "location": "[resources('location')]",
       "properties": {
         "networkSecurityGroup": {
-          "id": "[resourceId('Microsoft.Network/networkSecurityGroups/', concat(parameters('namePrefix'),'nsg'))]"
         },
         "ipConfigurations": [
           {
             "name": "ipconfig1",
             "properties": {
               "privateIPAllocationMethod": "Static",
-              "privateIPAddress": "[variables('sqlNicIPAddress')]",              
+              "privateIPAddress": "[variables('sqlNicIPAddress')]",
               "subnet": {
                 "id": "[variables('subnetID')]"
               },
               "loadBalancerBackendAddressPools": [
                 {
-                  "id": "[concat(variables('lbID'), '/backendAddressPools/LoadBalancerBackend')]"
+
                 }
               ],
               "loadBalancerInboundNatRules": [
                 {
-                  "id": "[concat(variables('lbID'),'/inboundNatRules/ssh-sql')]"
                 }
               ]
             }
@@ -71,21 +84,21 @@
       "tags": {
         "displayName": "MySQL Virtual Machine"
       },
-      "name": "[concat(parameters('namePrefix'), 'sql')]",
-      "location": "[parameters('location')]",
+      "name": "[concat(variables('dnsLabel'), '-sql')]",
+      "location": "[variables('location')]",
       "dependsOn": [
-        "[concat('Microsoft.Network/networkInterfaces/', parameters('namePrefix'),'sqlnic')]"
+        "[concat('Microsoft.Network/networkInterfaces/', variables('dnsLabel'),'-sql-nic')]"
       ],
       "properties": {
         "availabilitySet": {
-          "id": "[resourceId('Microsoft.Compute/availabilitySets',concat(parameters('namePrefix'),'avset'))]"
+          "id": "[resourceId('Microsoft.Compute/availabilitySets',concat(variables('dnsLabel'),'-sql-as'))]"
         },
         "hardwareProfile": {
-          "vmSize": "[parameters('vmSize')]"
+          "vmSize": "[variables('vmSize')]"
         },
         "osProfile": {
-          "computerName": "[concat(parameters('namePrefix'), 'sql')]",
-          "adminUsername": "[parameters('adminUsername')]",
+          "computerName": "[concat(parameters('namePrefix'), '-sql')]",
+          "adminUsername": "[variables('adminUsername')]",
           "adminPassword": "[parameters('adminPassword')]"
         },
         "storageProfile": {
@@ -98,7 +111,7 @@
           "osDisk": {
             "name": "osdisk",
             "vhd": {
-              "uri": "[concat('http://',variables('storageAccountName'),'.blob.core.windows.net/vhds/','osdisk01.vhd')]"
+              "uri": "[concat('http://',variables('newDataStorageAccountName'),'.blob.core.windows.net/vhds/','osdisk01.vhd')]"
             },
             "caching": "ReadWrite",
             "createOption": "FromImage"
@@ -107,14 +120,14 @@
         "networkProfile": {
           "networkInterfaces": [
             {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(parameters('namePrefix'),'sqlnic'))]"
+              "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('dnsLabel'),'-sql-nic'))]"
             }
           ]
         },
         "diagnosticsProfile": {
           "bootDiagnostics": {
             "enabled": true,
-            "storageUri": "[concat('http://',variables('storageAccountName'),'.blob.core.windows.net')]"
+            "storageUri": "[concat('http://',variables('newDataStorageAccountName'),'.blob.core.windows.net')]"
           }
         }
       }
@@ -124,11 +137,11 @@
       "tags": {
         "displayName": "MySQL Startup Script"
       },
-      "name": "[concat(parameters('namePrefix'), 'sql/mysql_startup_script')]",
+      "name": "[concat(variables('dnsLabel'), '-sql/mysql_startup_script')]",
       "apiVersion": "2015-05-01-preview",
-      "location": "[parameters('location')]",
+      "location": "[variables('location')]",
       "dependsOn": [
-        "[concat('Microsoft.Compute/virtualMachines/', parameters('namePrefix'),'sql')]"
+        "[concat('Microsoft.Compute/virtualMachines/', variables('dnslabel'),'-sql')]"
       ],
       "properties": {
         "publisher": "Microsoft.OSTCExtensions",
