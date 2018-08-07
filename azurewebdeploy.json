@@ -49,8 +49,6 @@
         "count": 2
       },
       "properties": {
-        "networkSecurityGroup": {
-        },
         "ipConfigurations": [
           {
             "name": "ipconfig1",
