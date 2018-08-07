@@ -59,15 +59,7 @@
               "privateIPAddress": "[concat(variables('webNicIPAddressPrefix'), string(add(11, copyindex()))]",
               "subnet": {
                 "id": "[variables('subnetID')]"
-              },
-              "loadBalancerBackendAddressPools": [
-                {
-                }
-              ],
-              "loadBalancerInboundNatRules": [
-                {
-                }
-              ]
+              }
             }
           }
         ]
@@ -90,8 +82,6 @@
         "[concat('Microsoft.Storage/storageAccounts/', variables('newDataStorageAccountName'))]"
       ],
       "properties": {
-        "availabilitySet": {
-        },
         "hardwareProfile": {
           "vmSize": "[variables('vmSize')]"
         },
