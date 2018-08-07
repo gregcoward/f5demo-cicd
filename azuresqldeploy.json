@@ -4,8 +4,12 @@
   "parameters": {
     "adminPassword": {
       "type": "securestring"
-    }
-  },
+    },
+    "sqlNicIPAddress": {
+      "type": "string",
+      "defaultValue": "10.10.1.25"
+    }    
+  },  
   "variables": {
     "adminUsername": "xuser",
     "computeApiVersion": "2017-12-01",
@@ -21,7 +25,7 @@
     "imagePublisher": "Canonical",
     "imageOffer": "UbuntuServer",
     "imageSKU": "14.04.2-LTS",
-    "sqlNicIPAddress": "10.10.1.25",
+    "sqlNicIPAddress": "[parameters('sqlNicIPAddress')]",
     "tagValues": {
       "application": "APP",
       "cost": "COST",
