@@ -2,23 +2,19 @@
   "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "namePrefix": {
-      "type": "string"
-    },
-    "location": {
-      "type": "string"
-    },
-    "vmSize": {
-      "type": "string"
-    },
-    "adminUsername": {
-      "type": "string"
-    },
     "adminPassword": {
       "type": "securestring"
     }
   },
   "variables": {
+    "adminUsername": "xuser",
+    "computeApiVersion": "2017-12-01",
+    "networkApiVersion": "2017-11-01",
+    "storageApiVersion": "2017-10-01",
+    "dataStorageAccountType": "Standard_LRS",
+    "vmSize": "Standard_A4",
+    "dnsLabel": "[toLower(concat('f5demo-',substring(uniqueString(resourceGroup().id),0,5)))]",
+    "location": "[resourceGroup().location]",
     "vnetID": "[resourceId('f5demo-networking-eastus','Microsoft.Network/virtualNetworks','f5demo-vnet-eastus')]",
     "subnetID": "[concat(variables('vnetID'),'/subnets/','internal')]",
     "lbID": "[resourceId('Microsoft.Network/loadBalancers',concat(parameters('namePrefix'),'lb'))]",
@@ -26,24 +22,36 @@
     "imagePublisher": "Canonical",
     "imageOffer": "UbuntuServer",
     "imageSKU": "14.04.2-LTS",
+    "newDataStorageAccountName": "[concat(uniqueString(variables('dnsLabel'), resourceGroup().id, deployment().name), 'data002')]",
     "webNicIPAddressPrefix": "10.10.1."
   },
   "resources": [
+    {
+      "apiVersion": "[variables('storageApiVersion')]",
+      "kind": "Storage",
+      "location": "[variables('location')]",
+      "name": "[variables('newDataStorageAccountName')]",
+      "sku": {
+        "name": "[variables('dataStorageAccountType')]",
+        "tier": "Standard"
+      },
+      "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
+      "type": "Microsoft.Storage/storageAccounts"
+    },
     {
       "apiVersion": "2015-05-01-preview",
       "type": "Microsoft.Network/networkInterfaces",
       "tags": {
         "displayName": "NIC"
       },
-      "name": "[concat(parameters('namePrefix'), 'webnic',copyindex())]",
-      "location": "[parameters('location')]",
+      "name": "[concat(variables('dnslabel'), '-app-nic',copyindex())]",
+      "location": "[variables('location')]",
       "copy": {
         "name": "nicLoop",
         "count": 2
       },
       "properties": {
         "networkSecurityGroup": {
-          "id": "[resourceId('Microsoft.Network/networkSecurityGroups/', concat(parameters('namePrefix'),'nsg'))]"
         },
         "ipConfigurations": [
           {
@@ -56,12 +64,10 @@
               },
               "loadBalancerBackendAddressPools": [
                 {
-                  "id": "[concat(variables('lbID'), '/backendAddressPools/LoadBalancerBackend')]"
                 }
               ],
               "loadBalancerInboundNatRules": [
                 {
-                  "id": "[concat(variables('lbID'),'/inboundNatRules/ssh-vm', copyindex())]"
                 }
               ]
             }
@@ -75,25 +81,25 @@
       "tags": {
         "displayName": "Webserver Virtual Machine"
       },
-      "name": "[concat(parameters('namePrefix'),'web', copyindex())]",
+      "name": "[concat(variables('dnsLabel'),'-app', copyindex())]",
       "copy": {
         "name": "virtualMachineLoop",
         "count": 2
       },
-      "location": "[parameters('location')]",
+      "location": "[variables('location')]",
       "dependsOn": [
-        "[concat('Microsoft.Network/networkInterfaces/', parameters('namePrefix'),'webnic', copyindex())]"
+        "[concat('Microsoft.Network/networkInterfaces/', variables('dnsLabel'),'-app-nic', copyindex())]",
+        "[concat('Microsoft.Storage/storageAccounts/', variables('newDataStorageAccountName'))]"
       ],
       "properties": {
         "availabilitySet": {
-          "id": "[resourceId('Microsoft.Compute/availabilitySets',concat(parameters('namePrefix'),'avset'))]"
         },
         "hardwareProfile": {
-          "vmSize": "[parameters('vmSize')]"
+          "vmSize": "[variables('vmSize')]"
         },
         "osProfile": {
-          "computerName": "[concat(parameters('namePrefix'), 'web', copyIndex())]",
-          "adminUsername": "[parameters('adminUsername')]",
+          "computerName": "[concat(variables('dnsLabel'), '-app', copyIndex())]",
+          "adminUsername": "[variables('adminUsername')]",
           "adminPassword": "[parameters('adminPassword')]"
         },
         "storageProfile": {
@@ -106,7 +112,7 @@
           "osDisk": {
             "name": "osdisk",
             "vhd": {
-              "uri": "[concat('http://',variables('storageAccountName'),'.blob.core.windows.net/vhds/','osdisk', copyindex(), '.vhd')]"
+              "uri": "[concat('http://',variables('newDataStorageAccountName'),'.blob.core.windows.net/vhds/','osdisk', copyindex(), '.vhd')]"
             },
             "caching": "ReadWrite",
             "createOption": "FromImage"
@@ -115,14 +121,14 @@
         "networkProfile": {
           "networkInterfaces": [
             {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(parameters('namePrefix'),'webnic',copyindex()))]"
+              "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('dnsLabel'),'-app-nic',copyindex()))]"
             }
           ]
         },
         "diagnosticsProfile": {
           "bootDiagnostics": {
             "enabled": true,
-            "storageUri": "[concat('http://',variables('storageAccountName'),'.blob.core.windows.net')]"
+            "storageUri": "[concat('http://',variables('newDataStorageAccountName'),'.blob.core.windows.net')]"
           }
         }
       }
@@ -136,11 +142,11 @@
         "name": "extensionLoop",
         "count": 2
       },
-      "name": "[concat(parameters('namePrefix'), 'web',copyindex(),'/startup_script')]",
+      "name": "[concat(variables('dnsLabel'), '-app',copyindex(),'/startup_script')]",
       "apiVersion": "2015-05-01-preview",
-      "location": "[parameters('location')]",
+      "location": "[variables('location')]",
       "dependsOn": [
-        "[concat('Microsoft.Compute/virtualMachines/', parameters('namePrefix'),'web',copyindex())]"
+        "[concat('Microsoft.Compute/virtualMachines/', variables('dnaLabel'),'-app',copyindex())]"
       ],
       "properties": {
         "publisher": "Microsoft.OSTCExtensions",
@@ -151,19 +157,11 @@
             "https://raw.githubusercontent.com/tstanley93/OpenCart-WAF/master/OpenCart-WAF/startup_script.sh",
             "https://raw.githubusercontent.com/tstanley93/OpenCart-WAF/master/OpenCart-WAF/opencart-2.0.1.1.zip"
           ],
-          "commandToExecute": "[concat('bash startup_script.sh ',parameters('namePrefix'),'sql',' ',parameters('namePrefix'),' ',2, ' ',parameters('namePrefix'), 'web ',parameters('adminUsername'), ' ',parameters('adminPassword'))]"
+          "commandToExecute": "[concat('bash startup_script.sh ',variables('dnslabel'),'-sql',' ',variables('dnsLabel'),' ',2, ' ',variables('dnsLabel'), '-app ',variables('adminUsername'), ' ',parameters('adminPassword'))]"
         }
       }
     }
   ],
   "outputs": {
-    "webIP0": {
-      "value": "[reference(concat(parameters('namePrefix'),'webnic0')).ipConfigurations[0].properties.privateIPAddress]",
-      "type": "string"
-    },
-    "webIP1": {
-      "value": "[reference(concat(parameters('namePrefix'),'webnic1')).ipConfigurations[0].properties.privateIPAddress]",
-      "type": "string"
-    }
   }
 }
