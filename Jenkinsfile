@@ -8,7 +8,7 @@ pipeline {
                 powershell 'az group create -l eastus -n $($env:rgName)'
                 powershell 'az group deployment create --resource-group $($env:rgName) --mode Incremental --template-uri "https://raw.githubusercontent.com/gregcoward/f5demo-cicd/master/azuresqldeploy.json" --parameters adminPassword="$($env:adminPassword)"'
                 powershell 'az group deployment create  --resource-group $($env:rgName) --mode Incremental --template-uri "https://raw.githubusercontent.com/gregcoward/f5demo-cicd/master/azurewebdeploy.json" --parameters adminPassword="$($env:adminPassword)"'
-                powershell 'az group deployment create  --resource-group $($env:rgName) --mode Incremental --template-uri "https://raw.githubusercontent.com/gregcoward/f5-azure-arm-templates/master/supported/standalone/1nic/existing-stack/bigiq/azuredeploy.json" --parameters adminPasswordOrKey="$($env:adminPasswordOrKey)" bigIqPassword="$($env:bigIqPassword)" mgmtAddress="$($env:mgmtAddress)"'
+                powershell 'az group deployment create  --resource-group $($env:rgName) --mode Incremental --template-uri "https://raw.githubusercontent.com/gregcoward/f5-azure-arm-templates/master/supported/standalone/1nic/existing-stack/bigiq/azuredeploy.json" --parameters adminPasswordOrKey="$($env:adminPassword)" bigIqPassword="$($env:bigIqPassword)" mgmtAddress="$($env:mgmtAddress)"'
       }
         }
     }
