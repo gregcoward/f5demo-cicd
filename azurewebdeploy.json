@@ -21,9 +21,6 @@
     "location": "[resourceGroup().location]",
     "vnetID": "[resourceId('f5demo-networking-eastus','Microsoft.Network/virtualNetworks','f5demo-vnet-eastus')]",
     "subnetID": "[concat(variables('vnetID'),'/subnets/','internal')]",
-    "imagePublisher": "Canonical",
-    "imageOffer": "UbuntuServer",
-    "imageSKU": "14.04.2-LTS",
     "tagValues": {
       "application": "APP",
       "cost": "COST",
@@ -81,6 +78,11 @@
         "displayName": "Webserver Virtual Machine"
       },
       "name": "[concat(variables('dnsLabel'),'-app', copyindex())]",
+      "plan": {
+        "name": "2-1",
+        "publisher": "bitnami",
+        "product": "opencart"
+      },
       "copy": {
         "name": "virtualMachineLoop",
         "count": 2
@@ -101,9 +103,9 @@
         },
         "storageProfile": {
           "imageReference": {
-            "publisher": "[variables('imagePublisher')]",
-            "offer": "[variables('imageOffer')]",
-            "sku": "[variables('imageSKU')]",
+            "publisher": "bitnami",
+            "offer": "opencart",
+            "sku": "2-1",
             "version": "latest"
           },
           "osDisk": {
@@ -127,34 +129,6 @@
             "enabled": true,
             "storageUri": "[concat('http://',variables('newDataStorageAccountName'),'.blob.core.windows.net')]"
           }
-        }
-      }
-    },
-    {
-      "type": "Microsoft.Compute/virtualMachines/extensions",
-      "tags": {
-        "displayName": "Webserver Startup Script"
-      },
-      "copy": {
-        "name": "extensionLoop",
-        "count": 2
-      },
-      "name": "[concat(variables('dnsLabel'), '-app',copyindex(),'/startup_script')]",
-      "apiVersion": "2015-05-01-preview",
-      "location": "[variables('location')]",
-      "dependsOn": [
-        "[concat('Microsoft.Compute/virtualMachines/', variables('dnsLabel'),'-app',copyindex())]"
-      ],
-      "properties": {
-        "publisher": "Microsoft.OSTCExtensions",
-        "type": "CustomScriptForLinux",
-        "typeHandlerVersion": "1.2",
-        "settings": {
-          "fileUris": [
-            "https://raw.githubusercontent.com/tstanley93/OpenCart-WAF/master/OpenCart-WAF/startup_script.sh",
-            "https://raw.githubusercontent.com/tstanley93/OpenCart-WAF/master/OpenCart-WAF/opencart-2.0.1.1.zip"
-          ],
-          "commandToExecute": "[concat('bash startup_script.sh ',variables('dnslabel'),'-sql',' ',variables('dnsLabel'),' ',2, ' ',variables('dnsLabel'), '-app ',variables('adminUsername'), ' ',parameters('adminPassword'))]"
         }
       }
     }
